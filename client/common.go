@@ -14,6 +14,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"time"
+	"strings"
 )
 
 const (
@@ -118,6 +119,7 @@ func setupRancherBaseClient(rancherClient *RancherBaseClient, opts *ClientOpts) 
 		opts.Timeout = time.Second * 10
 	}
 	client := &http.Client{Timeout: opts.Timeout}
+
 	req, err := http.NewRequest("GET", opts.Url, nil)
 	if err != nil {
 		return err
@@ -137,6 +139,8 @@ func setupRancherBaseClient(rancherClient *RancherBaseClient, opts *ClientOpts) 
 	}
 
 	schemasUrls := resp.Header.Get("X-API-Schemas")
+	schemasUrls = strings.Replace(schemasUrls, "/v1/", "/v1-catalog/",1)
+
 	if len(schemasUrls) == 0 {
 		return errors.New("Failed to find schema at [" + opts.Url + "]")
 	}
@@ -161,6 +165,7 @@ func setupRancherBaseClient(rancherClient *RancherBaseClient, opts *ClientOpts) 
 	}
 
 	var schemas Schemas
+
 	bytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
